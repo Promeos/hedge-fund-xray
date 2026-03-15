@@ -148,8 +148,14 @@ def fetch_vix_data(fred_client, cache_path=None):
 # SEC EDGAR — 13F Holdings
 # ---------------------------------------------------------------------------
 
-def fetch_13f_holdings(cik, fund_name, cache_dir="data/raw"):
-    """Fetch 13F-HR filing data from SEC EDGAR for a given fund."""
+def fetch_13f_holdings(cik, fund_name, cache_dir="data/raw",
+                       start_date="2020-10-01", end_date="2021-06-30"):
+    """Fetch 13F-HR filing data from SEC EDGAR for a given fund.
+
+    Args:
+        start_date: Earliest filing date to fetch holdings for (inclusive).
+        end_date: Latest filing date to fetch holdings for (inclusive).
+    """
     cache_path = os.path.join(cache_dir, f"13f_{fund_name.replace(' ', '_').lower()}.csv")
     if os.path.exists(cache_path):
         print(f"  Cached: {fund_name}")
@@ -186,14 +192,13 @@ def fetch_13f_holdings(cik, fund_name, cache_dir="data/raw"):
         df_filings = pd.DataFrame(records)
         print(f"  Found {len(df_filings)} 13F filings for {fund_name} (latest: {df_filings['filing_date'].iloc[0]})")
 
-        # Focus on filings around GameStop (Q4 2020 - Q1 2021)
-        gme_window = df_filings[
-            (df_filings['filing_date'] >= '2020-10-01') &
-            (df_filings['filing_date'] <= '2021-06-30')
+        window = df_filings[
+            (df_filings['filing_date'] >= start_date) &
+            (df_filings['filing_date'] <= end_date)
         ]
 
         all_holdings = []
-        for _, filing in gme_window.iterrows():
+        for _, filing in window.iterrows():
             acc_no = filing['accession'].replace('-', '')
             acc_dash = filing['accession']
             cik_stripped = cik.lstrip('0')
