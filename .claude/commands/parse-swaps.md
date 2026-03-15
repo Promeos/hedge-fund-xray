@@ -1,29 +1,27 @@
-Parse all CFTC weekly swap report Excel files and build time series datasets.
+Parse all CFTC weekly swap reports and build time series CSVs.
 
 ## Steps
 
-1. Scan `data/raw/swaps/` for all `.xlsx` files
-2. For each file, extract the date from the filename
-3. From each file, extract:
-   - **Sheet 1**: IR notional outstanding (total, cleared, uncleared)
-   - **Sheet 1**: Credit notional outstanding (total, cleared, uncleared)
-   - **Sheet 1**: FX notional outstanding (if available, post-2018)
-   - **Sheet 2**: Counterparty split (SD/MSP vs Others)
-   - **Sheet 7a**: IR product breakdown (Basis, Fixed-Float, OIS, Swaption)
-   - **Sheet 13a**: Credit product breakdown (Index/Tranche, by region, cleared/uncleared)
-   - **Sheet 19a**: FX product breakdown (if available)
+1. Run `python3 -m src.data.parse_swaps`
+2. Parses Sheet 1 (overview) from each Excel file in `data/raw/swaps/`
+3. Extracts IR, Credit, FX notional (total/cleared/uncleared) per week
+4. Deduplicates overlapping weekly dates across files
+5. Converts millions → billions USD
 
-4. Build weekly DataFrames:
-   - `swaps_notional_weekly.csv` — headline notional by asset class
-   - `swaps_credit_weekly.csv` — credit detail (HY vs IG, by region)
-   - `swaps_ir_products_weekly.csv` — IR product breakdown
+## Output Files
+- `swaps_weekly.csv` — Wide format: IR/Credit/FX notional + cleared % per week
+- `swaps_weekly_long.csv` — Long format: metric, date, value
+- `swaps_quarterly.csv` — Quarter-end snapshots for cross-source alignment
 
-5. Aggregate to quarterly for alignment with FRED and Form PF data
-6. Save all to `data/processed/`
-7. Print summary: date range, total records, notable spikes
+## Validation
+- IR notional ~$400-415T (in billions column)
+- Credit notional ~$6T
+- FX notional ~$75-80T (post-Oct 2018 only)
+- IR cleared % ~86%
+- Credit cleared % ~67%
+- FX cleared % ~4%
 
 ## Notes
-- Handle missing sheets gracefully (FX data starts Oct 2018, equity/commodity removed Oct 2015)
+- FX data only available from Oct 2018 onward
 - Government shutdown gap: Dec 22 2018 – Jan 26 2019
-- All values in millions USD (convert to billions for cross-source alignment)
-- Early files (2013) may have slightly different structures
+- Equity/commodity swaps reporting discontinued Oct 2015

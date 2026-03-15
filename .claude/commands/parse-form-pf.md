@@ -1,31 +1,39 @@
-Parse all Form PF supporting data Excel files and build a unified time series dataset.
+Parse all Form PF supporting data and produce processed CSVs with derived metrics.
 
 ## Steps
 
-1. Scan `data/raw/form_pf/` for all `.xlsx` files (supporting data files)
-2. For each file, extract the quarter from the filename
-3. Extract key hedge fund metrics from each file:
-   - Tab.2.1: Hedge Fund GAV
-   - Tab.2.3: Hedge Fund NAV
-   - Tab.2.9: Borrowings % of GAV (Hedge Fund row)
-   - Tab.5.1: Derivative value (Hedge Fund row)
-   - Tab.6.3: Top 10/25/50/100 concentration
-   - Tab.8.16: Long notional by investment type
-   - Tab.8.17: Short notional by investment type
-   - Tab.8.27: Borrowing detail
-   - Tab.8.34: Borrowing by creditor type
+1. Run `python3 -m src.data.parse_form_pf`
+2. This parses the latest Excel file in `data/raw/form_pf/` (contains full history 2013Q1–2025Q1)
+3. Produces 14 data CSVs + 5 derived metric CSVs in `data/processed/`
+4. Print summary: latest HF GAV, NAV, GAV/NAV ratio, top-10 concentration
 
-4. Build a quarterly DataFrame with all metrics
-5. Compute derived metrics:
-   - GAV/NAV ratio (leverage proxy)
-   - Derivatives/NAV ratio
-   - Net exposure by asset class (long - short)
-   - Borrowing composition
+## Output Files
 
-6. Save to `data/processed/form_pf_hedge_fund_timeseries.csv`
-7. Print summary statistics and notable trends
+**Data CSVs:**
+- `form_pf_gav_nav.csv` — GAV, NAV, leverage ratio by fund type
+- `form_pf_fund_counts.csv` — Fund counts by type
+- `form_pf_borrowing_pct.csv` — Borrowing as % of GAV
+- `form_pf_borrowing_detail.csv` — Monthly: Reverse Repo, Prime Broker, Other, Unsecured
+- `form_pf_borrowing_creditor.csv` — Monthly: creditor type breakdown
+- `form_pf_derivatives.csv` — Derivative value and % of NAV
+- `form_pf_concentration.csv` — Top-N fund shares
+- `form_pf_strategy.csv` — GAV, NAV, borrowing by strategy
+- `form_pf_leverage_dist.csv` — Monthly leverage bucket distributions
+- `form_pf_notional.csv` — Monthly long/short notional by 35 investment types
+- `form_pf_liquidity.csv` — Investor, portfolio, financing liquidity
+- `form_pf_fair_value.csv` — Level 1/2/3 fair value hierarchy
+- `form_pf_geography.csv` — Regional exposure
+- `form_pf_sector.csv` — Industry/sector allocation
 
-## Notes
-- Earlier files may have fewer tabs or different sheet names — handle gracefully
+**Derived Metric CSVs:**
+- `form_pf_metric_hf_gav_nav.csv` — HF leverage time series
+- `form_pf_metric_concentration_top10.csv` — Concentration trend
+- `form_pf_metric_latest_notional.csv` — Latest directional exposures
+- `form_pf_metric_strategy_hhi.csv` — Strategy diversification index
+- `form_pf_metric_liquidity_mismatch.csv` — Redemption and funding risk
+
+## Validation
+- HF GAV should be ~$12.6T (2025Q1)
+- GAV/NAV ratio should be ~2.3x
+- Top-10 NAV share should be ~8.2%
 - All values in billions USD
-- Cross-reference with FRED Z.1 data for validation

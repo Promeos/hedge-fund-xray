@@ -86,11 +86,40 @@ You provide SEC and financial regulatory context for the hedge fund analysis. Yo
 - **Filing delays:** Standard 45-day lag for 13F; COVID extensions pushed some to 60+ days
 - **Survivorship bias:** Funds that close (e.g., Melvin Capital) exit the Z.1 aggregate data
 
+## Form PF Regulatory Context
+- 2012-Q4: Form PF reporting begins (Dodd-Frank mandate)
+- 2014: Form PF amendments proposed
+- 2023-02: SEC adopts Form PF amendments — enhanced large HF reporting
+- 2023-05: Amended Form PF effective — new Sections 5-6, expanded Section 8
+- 2024: Form PF data quality improvements (SEC staff reports)
+
+**Limitations:**
+- Aggregate statistics only (fund-level data is confidential)
+- Self-reported by advisers (not independently verified)
+- Quarterly/annual frequency — misses intra-quarter dynamics
+- QHF threshold changes over time
+- Only SEC-registered advisers with >$150M AUM
+
+## DTCC Regulatory Context
+- Dodd-Frank Title VII mandated swap data reporting to SDRs (2010)
+- DTCC operates the largest U.S. Swap Data Repository
+- Real-time public reporting with delays for block trades
+- 2022: CFTC rewrote reporting rules (new 110-column format)
+- No counterparty identification in public data (anonymized)
+
+## FCM Regulatory Context
+- CFTC Rule 1.10: Monthly financial reporting required
+- Customer protection: segregation requirements (Rule 1.20-1.30)
+- Section 30.7: Foreign futures/options customer protection
+- Post-MF Global reforms (2012): enhanced segregation, target residual interest
+- FCMs file within 17 business days of month-end
+
 ## Common Tasks
 - Add regulatory context to analysis findings
 - Map balance sheet changes to regulatory events
 - Assess 13F data completeness and limitations
-- Identify potential Form PF integration points
-- Explain filing timeline implications for data freshness
-- Flag regulatory risks visible in the data (leverage thresholds, concentration)
+- Interpret Form PF data in regulatory context
+- Explain DTCC reporting rules and public data limitations
+- Explain FCM segregation and capital requirements
+- Flag regulatory risks visible in the data
 - Draft limitations and caveats sections for reports

@@ -1,44 +1,69 @@
-# Hedge Fund Industry Analysis
+# Hedge Fund X-Ray
 
-Balance Sheet Trends, Leverage, and the Meme Stock Era (2012-2025)
-
-Analysis of domestic hedge fund balance sheets using Federal Reserve Z.1 data (Table B.101.f), enriched with SEC 13F filings, CFTC Commitments of Traders positioning, and CBOE VIX volatility data. The narrative covers post-GFC recovery, leverage buildup, COVID shock, meme stock squeeze, and aftermath.
+Open-source intelligence project reconstructing the U.S. hedge fund industry from 9 public regulatory data sources — balance sheets, derivatives, borrowing, positioning, fund-level holdings, trade-level swap data, and broker financials.
 
 ## Directory Structure
 
 ```
 financial_data/
 ├── CLAUDE.md                    # This file — project guide
+├── LICENSE                      # CC BY-SA 4.0
 ├── .claude/
 │   ├── settings.local.json      # Claude Code permissions
-│   ├── agents/                  # Specialized agent definitions
-│   │   ├── data-engineer.md     # Data pipeline agent
+│   ├── agents/                  # 13 specialized agent definitions
+│   │   ├── data-engineer.md     # Data pipeline agent (9 sources)
 │   │   ├── analyst.md           # Financial analysis agent
-│   │   ├── visualizer.md        # Charting agent
+│   │   ├── visualizer.md        # Charting agent (18 chart functions)
 │   │   ├── report-writer.md     # Report generation agent
-│   │   ├── data-quality.md      # Data validation agent
-│   │   ├── statistician.md      # Advanced statistical analysis agent
-│   │   ├── regulatory-expert.md # SEC/regulatory domain agent
-│   │   └── scenario-analyst.md  # Stress testing & scenario agent
-│   └── commands/                # Slash commands
-│       ├── refresh-data.md      # /refresh-data — fetch all data sources
-│       ├── run-analysis.md      # /run-analysis — end-to-end pipeline
-│       ├── validate-data.md     # /validate-data — data quality sweep
-│       ├── generate-report.md   # /generate-report — produce formatted reports
-│       └── stress-test.md       # /stress-test — run scenario analysis
+│   │   ├── data-quality.md      # Data validation agent (9 sources)
+│   │   ├── statistician.md      # Statistical analysis + hypothesis tests
+│   │   ├── regulatory-expert.md # SEC/CFTC/DTCC regulatory context
+│   │   ├── scenario-analyst.md  # 10 stress test scenarios
+│   │   ├── form-pf-analyst.md   # SEC Form PF specialist (141 sheets)
+│   │   ├── swaps-analyst.md     # CFTC Weekly Swaps specialist
+│   │   ├── dtcc-analyst.md      # DTCC trade-level data specialist
+│   │   ├── fcm-analyst.md       # FCM broker financials specialist
+│   │   └── cross-source-analyst.md  # Cross-source reconciliation
+│   └── commands/                # 10 slash commands
+│       ├── refresh-data.md      # /refresh-data
+│       ├── run-analysis.md      # /run-analysis
+│       ├── validate-data.md     # /validate-data
+│       ├── generate-report.md   # /generate-report
+│       ├── stress-test.md       # /stress-test
+│       ├── parse-form-pf.md     # /parse-form-pf
+│       ├── parse-swaps.md       # /parse-swaps
+│       ├── parse-dtcc.md        # /parse-dtcc
+│       ├── parse-fcm.md         # /parse-fcm
+│       ├── cross-source-analysis.md  # /cross-source-analysis
+│       └── full-pipeline.md     # /full-pipeline
 ├── .env                         # API keys (never commit)
 ├── requirements.txt             # Python dependencies
 ├── data/
-│   ├── raw/                     # Original untransformed data (cached API responses)
-│   ├── processed/               # Cleaned, merged, derived datasets
+│   ├── raw/                     # Original data (cached)
+│   │   ├── swaps/               # ~600 CFTC weekly swap reports
+│   │   ├── dtcc/                # ~1,825 daily DTCC cumulative reports
+│   │   ├── fcm/                 # 49 monthly FCM financial reports
+│   │   ├── form_pf/             # SEC Form PF statistics (xlsx + pdf)
+│   │   ├── form_adv/            # Fund profiles from EDGAR API
+│   │   ├── 13f_*.csv            # Fund-level equity holdings
+│   │   ├── cftc_cot.csv         # Futures positioning
+│   │   └── vix_quarterly.csv    # Volatility index
+│   ├── processed/               # 30+ parsed CSVs
 │   └── .gitignore
 ├── notebooks/
-│   └── hedge_fund_analysis.ipynb  # Primary analysis notebook
+│   └── hedge_fund_analysis.ipynb
 ├── src/
 │   ├── __init__.py
 │   ├── data/
 │   │   ├── __init__.py
-│   │   ├── fetch.py             # FRED, SEC EDGAR, CFTC, VIX data fetchers
+│   │   ├── fetch.py             # FRED, SEC EDGAR, CFTC, VIX fetchers
+│   │   ├── fetch_swaps.py       # CFTC weekly swap downloader
+│   │   ├── fetch_dtcc.py        # DTCC cumulative report downloader
+│   │   ├── fetch_fcm.py         # CFTC FCM report downloader
+│   │   ├── parse_form_pf.py     # Form PF Excel parser (141 sheets → 19 CSVs)
+│   │   ├── parse_swaps.py       # CFTC swaps parser (Sheet 1 → weekly time series)
+│   │   ├── parse_dtcc.py        # DTCC ZIP parser (110-col CSV → daily summaries)
+│   │   ├── parse_fcm.py         # FCM Excel parser (monthly → industry + broker CSVs)
 │   │   └── prepare.py           # Data cleaning and transformation
 │   ├── analysis/
 │   │   ├── __init__.py
@@ -46,120 +71,139 @@ financial_data/
 │   └── visualization/
 │       ├── __init__.py
 │       └── plots.py             # matplotlib/seaborn chart functions
-├── tests/                       # Test suite
+├── tests/
 └── outputs/
-    ├── figures/                 # Saved chart PNGs
-    └── reports/                 # Generated reports
+    ├── figures/                 # Generated charts
+    └── reports/                 # Reports, hypothesis tests, stress tests
 ```
 
 ## Tech Stack
 
 - **Python 3.10+**
-- Core: `pandas`, `numpy`
+- Core: `pandas`, `numpy`, `openpyxl`
+- Statistics: `statsmodels`, `scipy`, `scikit-learn`
 - Visualization: `matplotlib`, `seaborn`
 - Data access: `requests`, `fredapi`
 - Configuration: `python-dotenv`
-- Standard library: `os`, `json`, `time`, `datetime`, `warnings`, `xml.etree.ElementTree`, `io.StringIO`
 
-## Data Sources
+## Data Sources (9)
 
-### 1. FRED API — Federal Reserve Z.1 Financial Accounts
-- **Table B.101.f**: Balance Sheet of Domestic Hedge Funds
-- 30 series covering assets, liabilities, net assets, derivatives
-- Series IDs: `BOGZ1FL62*Q` (quarterly)
-- Also: `VIXCLS` for daily VIX data
-- Requires `FRED_API_KEY` in `.env`
-- Rate limit: 0.2s between requests
-
-### 2. SEC EDGAR — 13F-HR Filings
-- 8 major hedge funds: Citadel, Bridgewater, Renaissance, Point72, Two Sigma, D.E. Shaw, Millennium, AQR
-- Focus window: Q4 2020 - Q1 2021 (GameStop event)
-- Requires `User-Agent` header
-- Rate limit: 0.15s between requests
-
-### 3. CFTC — Commitments of Traders
-- Traders in Financial Futures (TFF) report
-- Equity index futures: S&P 500, DJIA, NASDAQ, Russell
-- Leveraged fund long/short/spreading positions
-
-### 4. CBOE VIX — Volatility Index
-- Fetched via FRED (VIXCLS series)
-- Aggregated from daily to quarterly (mean, max, min, end, std)
+| # | Source | Fetcher | Parser | Coverage |
+|---|--------|---------|--------|----------|
+| 1 | **Federal Reserve Z.1** | `fetch.py` | `prepare.py` | 1945–2025, quarterly |
+| 2 | **SEC Form PF** | Manual | `parse_form_pf.py` | 2013–2025, quarterly + monthly |
+| 3 | **CFTC Weekly Swaps** | `fetch_swaps.py` | `parse_swaps.py` | 2013–2026, weekly |
+| 4 | **SEC EDGAR 13F** | `fetch.py` | `fetch.py` | Per filing |
+| 5 | **SEC EDGAR Submissions** | `fetch.py` | `fetch.py` | 1996–2026 |
+| 6 | **CFTC COT** | `fetch.py` | `fetch.py` | Weekly |
+| 7 | **CBOE VIX** | `fetch.py` | `fetch.py` | Daily → quarterly |
+| 8 | **DTCC Swap Repository** | `fetch_dtcc.py` | `parse_dtcc.py` | 2025–2026, daily |
+| 9 | **CFTC FCM Financials** | `fetch_fcm.py` | `parse_fcm.py` | 2022–2026, monthly |
 
 ## Key Commands
 
 ```bash
-# Install dependencies
 pip install -r requirements.txt
 
-# Run the notebook
+# Fetch data
+python -m src.data.fetch           # FRED, 13F, COT, VIX
+python -m src.data.fetch_swaps     # ~600 weekly CFTC reports
+python -m src.data.fetch_dtcc      # ~1,825 daily DTCC reports
+python -m src.data.fetch_fcm       # 49 monthly FCM reports
+
+# Parse data
+python -m src.data.parse_form_pf   # → 19 CSVs in data/processed/
+python -m src.data.parse_swaps     # → 3 CSVs
+python -m src.data.parse_dtcc      # → 3 CSVs
+python -m src.data.parse_fcm       # → 5 CSVs
+
+# Analysis
 jupyter notebook notebooks/hedge_fund_analysis.ipynb
-
-# Fetch/refresh all data
-python -m src.data.fetch
-
-# Run tests
 pytest tests/
 ```
 
 ## Coding Conventions
 
-- All monetary values are in **billions USD** (FRED Z.1 returns millions; divide by 1000)
-- **Quarterly frequency** for all time series alignment (quarter-end dates)
-- **Cache first**: Always check for cached CSV in `data/raw/` before making API calls
-- Rate limits: 0.2s sleep for FRED, 0.15s for SEC EDGAR
-- Date parsing: `pd.to_datetime`; numeric conversion: `pd.to_numeric(errors='coerce')`
-- Missing values: `fillna(0)` for balance sheet items
-- Plotting style: `seaborn-v0_8-whitegrid`, figure size `(14, 6)`, DPI 100, font size 12
-- Market event annotations on all time series charts via `add_event_annotations()`
+- All monetary values in **billions USD** (FRED returns millions ÷ 1000; FCM in raw USD ÷ 1e9)
+- **Quarterly frequency** for cross-source alignment (quarter-end dates)
+- **Cache first**: Check `data/raw/` before API calls
+- Rate limits: 0.2s FRED, 0.15s SEC EDGAR, 0.2s DTCC, 0.3s CFTC
+- Date parsing: `pd.to_datetime`; numeric: `pd.to_numeric(errors='coerce')`
+- Plotting: `seaborn-v0_8-whitegrid`, `(14, 6)`, DPI 100, font 12pt
+- Event annotations via `add_event_annotations()`
 
 ## Security
 
-- `.env` contains `FRED_API_KEY` — **never commit this file**
-- SEC EDGAR `User-Agent` header should use a real contact email for production use
-- No other credentials stored; CFTC and VIX data are publicly available
+- `.env` contains `FRED_API_KEY` — **never commit**
+- SEC EDGAR `User-Agent` header needs real contact email for production
+- All other data sources are publicly accessible without credentials
 
-## Agents
+## Agents (13)
 
 | Agent | File | Purpose |
 |-------|------|---------|
-| Data Engineer | `.claude/agents/data-engineer.md` | FRED, SEC EDGAR, CFTC, VIX data pipelines; caching; rate limiting |
-| Financial Analyst | `.claude/agents/analyst.md` | Derived metrics, leverage trends, allocation analysis, market event impact |
-| Visualizer | `.claude/agents/visualizer.md` | matplotlib/seaborn charts; style guide; event annotations; 8 chart functions |
-| Report Writer | `.claude/agents/report-writer.md` | Executive summaries, HTML reports, CSV exports to `outputs/reports/` |
-| Data Quality | `.claude/agents/data-quality.md` | Schema validation, range checks, temporal continuity, cross-source reconciliation |
-| Statistician | `.claude/agents/statistician.md` | ARIMA, Granger causality, regime detection, VaR/CVaR, event studies |
-| Regulatory Expert | `.claude/agents/regulatory-expert.md` | SEC filing interpretation, regulatory timeline, 13F limitations, compliance context |
-| Scenario Analyst | `.claude/agents/scenario-analyst.md` | Stress tests, sensitivity analysis, drawdown modeling, Monte Carlo simulation |
+| Data Engineer | `data-engineer.md` | 9-source data pipelines, caching, rate limiting |
+| Financial Analyst | `analyst.md` | Leverage trends, allocation analysis, market events |
+| Visualizer | `visualizer.md` | 18 chart functions, style guide, event annotations |
+| Report Writer | `report-writer.md` | Executive summaries, HTML reports, CSV exports |
+| Data Quality | `data-quality.md` | 9-source validation, cross-source reconciliation |
+| Statistician | `statistician.md` | ARIMA, Granger causality, regime detection, multi-source tests |
+| Regulatory Expert | `regulatory-expert.md` | SEC/CFTC/DTCC filing interpretation, regulatory timeline |
+| Scenario Analyst | `scenario-analyst.md` | 10 stress scenarios, VaR/CVaR, Monte Carlo |
+| Form PF Analyst | `form-pf-analyst.md` | 141-sheet Excel parser, 8 hypothesis tests, leverage/liquidity |
+| Swaps Analyst | `swaps-analyst.md` | CFTC weekly swaps, IR/Credit/FX notional, clearing trends |
+| DTCC Analyst | `dtcc-analyst.md` | Trade-level OTC data, 110 columns, clearing/PB analysis |
+| FCM Analyst | `fcm-analyst.md` | Broker capital, customer segregation, concentration |
+| Cross-Source Analyst | `cross-source-analyst.md` | 9-source reconciliation, 9 hypothesis tests |
 
-## Slash Commands
+## Slash Commands (10)
 
-| Command | File | Purpose |
-|---------|------|---------|
-| `/refresh-data` | `.claude/commands/refresh-data.md` | Fetch latest data from all 4 sources |
-| `/run-analysis` | `.claude/commands/run-analysis.md` | End-to-end: load data → compute metrics → generate charts → summary stats |
-| `/validate-data` | `.claude/commands/validate-data.md` | Full data quality sweep with PASS/WARN/FAIL report |
-| `/generate-report` | `.claude/commands/generate-report.md` | Produce executive summary, charts, and CSV exports |
-| `/stress-test` | `.claude/commands/stress-test.md` | Run 4 stress scenarios + VaR/drawdown analysis |
+| Command | Purpose |
+|---------|---------|
+| `/refresh-data` | Fetch latest data from all sources |
+| `/run-analysis` | End-to-end: load → metrics → charts → stats |
+| `/validate-data` | Full data quality sweep (PASS/WARN/FAIL) |
+| `/generate-report` | Executive summary, charts, CSV exports |
+| `/stress-test` | 10 stress scenarios + VaR/drawdown |
+| `/parse-form-pf` | Parse Form PF → 19 CSVs |
+| `/parse-swaps` | Parse CFTC swaps → 3 CSVs |
+| `/parse-dtcc` | Parse DTCC trades → 3 CSVs |
+| `/parse-fcm` | Parse FCM financials → 5 CSVs |
+| `/cross-source-analysis` | Cross-source reconciliation + hypothesis tests |
+| `/full-pipeline` | Run everything end-to-end |
 
 ## Derived Metrics Reference
 
+### Z.1 Balance Sheet Metrics
 | Metric | Formula |
 |--------|---------|
 | `leverage_ratio` | Total liabilities / Total net assets |
-| `cash_to_assets` | (Deposits + Other cash + MMF shares) / Total assets |
+| `cash_to_assets` | (Deposits + Other cash + MMF) / Total assets |
 | `equity_pct` | Corporate equities / Total assets |
-| `debt_securities_pct` | Total debt securities / Total assets |
-| `derivative_to_assets` | Derivatives (long value) / Total assets |
-| `loans_to_assets` | Total loans (asset) / Total assets |
-| `prime_brokerage_pct` | Prime brokerage borrowing / Total loans (liability) |
-| `other_secured_pct` | Other secured borrowing / Total loans (liability) |
-| `unsecured_pct` | Unsecured borrowing / Total loans (liability) |
-| `domestic_borrowing` | Sum of domestic repo + prime brokerage + other secured |
-| `foreign_borrowing` | Sum of foreign repo + prime brokerage + other secured |
+| `derivative_to_assets` | Derivatives (long) / Total assets |
+| `prime_brokerage_pct` | Prime brokerage / Total loans (liability) |
 | `foreign_borrowing_share` | Foreign / (Domestic + Foreign) |
-| `total_assets_qoq` | Total assets quarter-over-quarter % change |
-| `total_assets_yoy` | Total assets year-over-year % change |
-| `net_assets_qoq` | Net assets quarter-over-quarter % change |
-| `liabilities_qoq` | Total liabilities quarter-over-quarter % change |
-| `leverage_change` | Leverage ratio quarter-over-quarter difference |
+
+### Form PF Metrics
+| Metric | Formula |
+|--------|---------|
+| `gav_nav_ratio` | GAV / NAV (true leverage proxy) |
+| `derivative_nav_ratio` | Derivative value / NAV |
+| `net_notional_by_type` | Long − Short per investment type |
+| `strategy_hhi` | Σ(strategy NAV share²) |
+| `liquidity_mismatch_30d` | Portfolio liquid 30d − Investor redeemable 30d |
+| `level3_asset_pct` | Level 3 / total assets |
+
+### FCM Metrics
+| Metric | Formula |
+|--------|---------|
+| `capital_adequacy_ratio` | adj_net_capital / requirement |
+| `swap_seg_share` | cleared_swap_seg / (customer_seg + swap_seg) |
+| `hhi` | Σ(FCM market share²) |
+
+### DTCC Metrics
+| Metric | Formula |
+|--------|---------|
+| `cleared_pct` | Cleared trades / total trades |
+| `pb_pct` | Prime brokerage / total trades |
+| `avg_trade_size` | Total notional / trade count |

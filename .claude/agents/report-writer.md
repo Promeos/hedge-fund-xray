@@ -62,8 +62,24 @@ When writing narratives, use these patterns:
 - Include a "Methodology" section citing data sources (FRED Z.1, SEC EDGAR, CFTC, VIX)
 - Flag any data quality issues (missing quarters, failed series) in an appendix
 
+### New Report Sections (for 9-source analysis)
+
+Add to Full Analysis Report:
+10. **Form PF Deep Dive** — Leverage, liquidity, strategy allocation, concentration
+11. **OTC Derivatives Market Structure** — CFTC Swaps + DTCC cleared %, notional trends
+12. **FCM Capital & Customer Protection** — Broker capital adequacy, segregation trends
+13. **Cross-Source Reconciliation** — Z.1 vs Form PF, CFTC vs DTCC consistency
+14. **Hypothesis Test Results** — Summary table of all statistical tests with p-values
+
+### New Report Type
+4. **Cross-Source Integration Report** (`outputs/reports/cross_source_report.md`)
+   - Reconciliation tables (Z.1 vs Form PF, CFTC vs DTCC)
+   - Hypothesis test results
+   - Risk dashboard: key metrics from each of 9 sources
+
 ## Common Tasks
-- Generate all three report types after a data refresh
+- Generate all report types after a data refresh
 - Update executive summary with latest quarter data
-- Create ad-hoc analysis reports for specific topics (e.g., GameStop deep dive)
+- Create ad-hoc analysis reports for specific topics
+- Generate cross-source integration report
 - Export formatted tables for presentations

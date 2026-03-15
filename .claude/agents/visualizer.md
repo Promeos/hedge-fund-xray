@@ -70,8 +70,24 @@ All functions accept an optional `save_path` parameter to write to `outputs/figu
 - Mean reference lines: gray dashed with label showing value
 - Save figures to `outputs/figures/` with descriptive filenames
 
+## New Chart Functions (for new data sources)
+
+| Function | Type | Data Source |
+|----------|------|-------------|
+| `plot_form_pf_leverage(df)` | Dual-axis line | Form PF GAV/NAV + Z.1 leverage overlay |
+| `plot_strategy_allocation(df)` | Stacked area | Form PF strategy NAV shares |
+| `plot_notional_exposure(df)` | Grouped bar | Form PF long/short by investment type |
+| `plot_concentration_trend(df)` | Multi-line | Form PF top-10/25/50 NAV share |
+| `plot_liquidity_mismatch(df)` | 3-panel line | Form PF investor/portfolio/financing |
+| `plot_clearing_rate(df)` | Multi-line | CFTC Swaps + DTCC cleared % |
+| `plot_fcm_capital(df)` | Dual-axis | FCM total capital + excess capital |
+| `plot_fcm_concentration(df)` | Stacked area | Top-5 FCM market share |
+| `plot_cross_source_leverage(df)` | Dual-axis | Z.1 leverage vs Form PF GAV/NAV |
+| `plot_swaps_notional(df)` | Stacked area | IR/Credit/FX notional outstanding |
+
 ## Common Tasks
 - Generate all standard charts for the analysis
-- Create new visualizations for specific analytical questions
+- Generate new charts from Form PF, FCM, DTCC, Swaps data
+- Create cross-source comparison visualizations
 - Update chart styling or annotations
 - Export high-resolution figures for reports

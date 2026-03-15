@@ -29,16 +29,16 @@ def compute_derived_metrics(df):
     df['other_secured_pct'] = df['Loans, total other secured borrowing; liability'] / total_borrowing
     df['unsecured_pct'] = df['Loans, total unsecured borrowing; liability'] / total_borrowing
 
-    # Domestic vs foreign borrowing
+    # Domestic vs foreign borrowing (fillna per-component so partial sums work)
     df['domestic_borrowing'] = (
-        df['Security repurchase agreements with domestic institutions; liability']
-        + df['Loans, secured borrowing via domestic prime brokerages; liability']
-        + df['Loans, other secured borrowing from domestic institutions; liability']
+        df['Security repurchase agreements with domestic institutions; liability'].fillna(0)
+        + df['Loans, secured borrowing via domestic prime brokerages; liability'].fillna(0)
+        + df['Loans, other secured borrowing from domestic institutions; liability'].fillna(0)
     )
     df['foreign_borrowing'] = (
-        df['Security repurchase agreements with foreign institutions; liability']
-        + df['Loans, secured borrowing via foreign prime brokerages; liability']
-        + df['Loans, other secured borrowing from foreign institutions; liability']
+        df['Security repurchase agreements with foreign institutions; liability'].fillna(0)
+        + df['Loans, secured borrowing via foreign prime brokerages; liability'].fillna(0)
+        + df['Loans, other secured borrowing from foreign institutions; liability'].fillna(0)
     )
     df['foreign_borrowing_share'] = df['foreign_borrowing'] / (df['domestic_borrowing'] + df['foreign_borrowing'])
 

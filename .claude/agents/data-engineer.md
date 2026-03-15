@@ -47,9 +47,45 @@ You are a data engineering specialist for the Hedge Fund Industry Analysis proje
 - Fill NaN with 0 for balance sheet items
 - Log fetch status (OK/FAILED) for each series
 
+## Additional Data Sources
+
+### SEC Form PF (no API key required)
+- Aggregated private fund statistics in Excel format
+- 141 sheets per file covering 2013Q1–2025Q1
+- Parser: `src/data/parse_form_pf.py`
+- Files: `data/raw/form_pf/form_pf_YYYYQN.xlsx`
+
+### CFTC Weekly Swaps (no API key required)
+- ~600 weekly Excel files, 52 sheets each (IR, Credit, FX)
+- Downloader: `src/data/fetch_swaps.py`
+- Parser: `src/data/parse_swaps.py`
+- Files: `data/raw/swaps/`
+- Gap: Dec 22 2018 – Jan 26 2019 (government shutdown)
+
+### DTCC Swap Repository (no API key required)
+- Daily cumulative swap reports, 5 asset classes
+- 110-column CSVs with ~30K trades/day
+- Downloader: `src/data/fetch_dtcc.py`
+- Parser: `src/data/parse_dtcc.py`
+- Files: `data/raw/dtcc/`
+- Data available from 2025-03-13 onward
+
+### CFTC FCM Financials (no API key required)
+- Monthly broker financial data, ~100 FCMs per month
+- Downloader: `src/data/fetch_fcm.py`
+- Parser: `src/data/parse_fcm.py`
+- Files: `data/raw/fcm/fcm_YYYY_MM.xlsx`
+
+### SEC EDGAR Submissions API
+- Complete filing histories for 8 target funds
+- Fetcher: `fetch_form_adv()` in `src/data/fetch.py`
+- Files: `data/raw/form_adv/adv_*.json`
+
 ## Common Tasks
 - Refresh data from all sources: `python -m src.data.fetch`
-- Add new FRED series to the balance sheet dataset
+- Download CFTC swaps: `python -m src.data.fetch_swaps`
+- Download DTCC data: `python -m src.data.fetch_dtcc`
+- Download FCM data: `python -m src.data.fetch_fcm`
+- Parse all sources: run each `parse_*.py` module
 - Debug API failures and handle rate limiting
 - Validate data integrity (check for missing quarters, outliers)
-- Extend the CFTC parser for additional commodity categories

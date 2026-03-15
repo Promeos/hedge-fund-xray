@@ -126,10 +126,37 @@ Historical comparison:
   - Recovery estimate: 3-4 quarters (based on 2020 recovery pace)
 ```
 
+### Multi-Source Scenarios (using Form PF + FCM + DTCC)
+
+#### 7. Liquidity Squeeze
+- **Shock:** Form PF investor liquidity drops to COVID trough (Tab.8.22)
+- **Cascade:** Financing liquidity tightens (Tab.8.33), forced liquidation of Level 3 assets
+- **Measure:** Liquidity mismatch gap, fire-sale discount estimate
+- **Data:** Form PF liquidity CSVs + fair value hierarchy
+
+#### 8. FCM Capital Stress
+- **Shock:** Top-3 FCMs lose 30% of excess capital
+- **Cascade:** Customer seg requirement increases 10%, margin call cascade
+- **Measure:** Number of FCMs below 120% capital adequacy
+- **Data:** FCM monthly industry + top brokers CSVs
+
+#### 9. Derivatives Notional Shock
+- **Shock:** Form PF derivatives-to-NAV ratio spikes 50%
+- **Cascade:** CFTC swaps cleared % drops 10% (clearing member stress)
+- **Impact:** Borrowing needs surge, counterparty exposure widens
+- **Data:** Form PF derivatives + CFTC swaps + DTCC cleared %
+
+#### 10. Strategy Rotation Stress
+- **Shock:** Equity strategy NAV drops 25% (Form PF Tab.8.9)
+- **Cascade:** Relative value absorbs flows, portfolio rebalancing costs
+- **Measure:** Strategy HHI shift, leverage impact by strategy
+- **Data:** Form PF strategy CSVs
+
 ## Common Tasks
-- Run all 6 scenario types against latest quarter data
+- Run all 10 scenario types against latest quarter data
 - Compute VaR/CVaR at 95% and 99% confidence levels
 - Event study comparing pre/post for each of the 4 market events
 - Sensitivity table: leverage vs asset decline (5% increments)
 - Monte Carlo simulation of net asset paths (8-quarter horizon)
 - Drawdown analysis with max drawdown, duration, and recovery time
+- Multi-source stress tests using Form PF + FCM + DTCC data

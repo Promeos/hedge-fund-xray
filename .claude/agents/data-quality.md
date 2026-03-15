@@ -76,9 +76,38 @@ DATA QUALITY REPORT — {timestamp}
 - Log all validation results to `outputs/reports/data_quality.txt`
 - Cross-reference the 4 market events (Volmageddon, COVID, GameStop, Fed hikes) — anomalies during these periods are expected
 
+## New Source Validation
+
+### Form PF
+- Schema: 141 expected sheet names in each Excel file
+- Range: GAV > NAV always (hedge funds are leveraged)
+- Range: GAV/NAV ratio typically 2.0–5.0 for hedge funds
+- Temporal: Monthly data (Section 8) should have no gaps
+- Cross-source: Form PF HF GAV should be 3–5x FRED Z.1 total assets
+
+### CFTC Swaps
+- Schema: Expect Sheet 1 with IR/Credit/FX rows
+- Range: IR notional $300–500T, Credit $4–15T
+- Temporal: Weekly, flag gaps beyond government shutdown
+- Cross-source: IR cleared % should match DTCC cleared % directionally
+
+### DTCC
+- Schema: 110 columns per CSV, verify key column names
+- Range: Notional amounts should be positive
+- Temporal: Business days only, flag weekend/holiday gaps
+- Cross-source: Daily aggregate should be consistent with CFTC weekly
+
+### FCM
+- Schema: ~20 columns per file, verify FCM names consistent across months
+- Range: adj_net_capital always > net_capital_requirement
+- Range: customer_seg always > seg_required (no deficiencies)
+- Temporal: Monthly, no gaps expected (49 files for Jan 2022–Jan 2026)
+
 ## Common Tasks
-- Full validation sweep across all data sources
+- Full validation sweep across all 9 data sources
 - Check data freshness after a `/refresh-data` run
 - Validate derived metrics after recomputation
 - Reconcile 13F fund-level data against Z.1 aggregate
+- Reconcile Form PF GAV against Z.1 total assets
+- Reconcile CFTC swaps cleared % against DTCC cleared %
 - Investigate flagged anomalies and determine if they're real or errors

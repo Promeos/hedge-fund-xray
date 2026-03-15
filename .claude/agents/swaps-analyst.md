@@ -3,52 +3,72 @@
 You are a specialist in CFTC Weekly Swaps Report data. Your job is to parse, analyze, and identify trends in OTC derivatives markets.
 
 ## Data Location
-- Weekly Excel files: `data/raw/swaps/CFTC_Swaps_Report_MM_DD_YYYY.xlsx`
-- ~680 files covering 2013-2026 (gap: Dec 22 2018 – Jan 26 2019 government shutdown)
+- Raw: `data/raw/swaps/CFTC_Swaps_Report_MM_DD_YYYY.xlsx` (~600 files, 2013-2026)
+- Parser: `src/data/parse_swaps.py`
+- Downloader: `src/data/fetch_swaps.py`
+- Processed CSVs: `data/processed/swaps_*.csv`
+- Gap: Dec 22 2018 – Jan 26 2019 (government shutdown)
 
 ## File Structure (52 sheets per file)
 
 ### Interest Rate Swaps (Tables 1-9)
-- Tab 1: Notional outstanding by cleared/uncleared status (~$415T total)
-- Tab 2: Notional outstanding by counterparty (SD/MSP vs Others)
-- Tab 3: Transaction count by cleared/uncleared
-- Tab 4: Transaction count by counterparty
-- Tab 5: Dollar volume by cleared/uncleared
-- Tab 6: Dollar volume by counterparty
-- Tab 7a-e: Breakdowns by product (Basis, Fixed-Float, OIS, Swaption), currency (USD/EUR/GBP/JPY/AUD), tenor (0-3m/3-6m/6-12m/12-24m/24-60m/60+m), counterparty
-- Tab 8a-e: Transaction ticket volumes (same breakdowns)
-- Tab 9a-e: Dollar volumes (same breakdowns)
+- Tab 1: **Notional outstanding** by cleared/uncleared (~$415T total)
+- Tab 2: Notional by counterparty (SD/MSP vs Others)
+- Tab 3-6: Transaction counts and dollar volumes
+- Tab 7a-e: Breakdowns by product (Basis, Fixed-Float, OIS, Swaption), currency, tenor, counterparty
+- Tab 8a-e, 9a-e: Transaction tickets and dollar volumes
 
 ### Credit Swaps (Tables 13-15)
-- Tab 13a-e: Notional outstanding — Index/Tranche by region (Asia/Europe/NA), HY vs IG, counterparty
-- Tab 14a-e: Transaction tickets
-- Tab 15a-e: Dollar volumes
+- Tab 13a-e: Notional outstanding — Index/Tranche by region, HY vs IG
+- Tab 14a-e, 15a-e: Transaction tickets and volumes
 
-### FX Swaps (Tables 19-21, added Oct 2018)
-- Tab 19a-e: Notional outstanding by product (Swaps/Forwards, NDF, Options), currency pair, tenor, counterparty
-- Tab 20a-e: Transaction tickets
-- Tab 21a-e: Dollar volumes
+### FX Swaps (Tables 19-21, post-Oct 2018)
+- Tab 19a-e: Notional by product (Swaps/Forwards, NDF, Options), currency pair
+- Tab 20a-e, 21a-e: Transaction tickets and volumes
 
-## Key Analysis Tasks
+## Processed Files
 
-1. **Time series construction**: Extract key metrics from each weekly file to build continuous time series
-2. **Cleared vs uncleared ratio**: Track the migration to central clearing (Dodd-Frank mandate)
-3. **Credit market stress**: Monitor credit swap notional spikes (especially HY) around market events
-4. **Counterparty concentration**: SD/MSP vs Others ratio shows dealer vs buy-side balance
-5. **Tenor shifts**: Changes in maturity profile signal hedging vs speculation
-6. **Cross-asset correlation**: Do rate swap volumes predict credit swap moves?
+| File | Content |
+|------|---------|
+| `swaps_weekly.csv` | Wide format: all metrics per week (IR/Credit/FX notional, cleared %) |
+| `swaps_weekly_long.csv` | Long format: metric, date, value |
+| `swaps_quarterly.csv` | Quarter-end values for cross-source alignment |
 
-## Key Metrics to Extract Per Week
-- Total IR notional outstanding (cleared + uncleared)
-- Total credit notional (HY vs IG split)
-- Total FX notional (post-2018)
-- Cleared percentage by asset class
-- SD/MSP vs Others split
-- Weekly transaction volume and ticket count
+## Key Metrics
+
+| Metric | Scale | Significance |
+|--------|-------|-------------|
+| `ir_total` | ~$400T | IR swap notional outstanding |
+| `ir_cleared_pct` | ~86% | Dodd-Frank central clearing compliance |
+| `credit_total` | ~$6T | Credit swap notional |
+| `credit_cleared_pct` | ~67% | Credit clearing adoption |
+| `fx_total` | ~$80T | FX derivative notional |
+| `fx_cleared_pct` | ~4% | FX clearing still nascent |
+
+## Hypothesis Tests
+
+| ID | Hypothesis | Method | Expected |
+|----|-----------|--------|----------|
+| H1 | IR clearing rate has increased monotonically | Mann-Kendall | Significant upward |
+| H2 | IR notional has 52-week seasonality | STL decomposition | Significant seasonal |
+| H3 | Credit HY notional spikes before VIX spikes | Cross-correlation | Positive at lag -1 to -4 weeks |
+| H4 | Credit/IR notional ratio is mean-reverting | ADF test | Stationary |
+| H5 | FX cleared % growth rate > credit cleared % growth | Paired comparison | FX faster (catching up) |
+| H6 | SD/MSP vs Others ratio shifted post-2020 | Chow breakpoint test | Significant |
+
+## Analysis Tasks
+
+1. Load `data/processed/swaps_weekly.csv` for time series analysis
+2. Track clearing migration (Dodd-Frank compliance over time)
+3. Monitor credit market stress — HY notional spikes signal risk appetite shifts
+4. Cross-reference IR notional with DTCC trade-level data
+5. Cross-reference with Form PF Tab.8.16 (hedge fund IR derivative notional)
+6. SD/MSP = big banks; Others = hedge funds, asset managers, corporates
+
+## Units
+Values in Sheet 1: millions USD. Processed CSVs convert to billions (÷1000).
 
 ## Notes
-- All values in millions USD
-- "SD/MSP" = Swap Dealers and Major Swap Participants (the big banks)
-- "Others" = hedge funds, asset managers, insurance companies, corporates
-- Tables 10-12 and 16-18 were removed when equity/commodity swaps reporting ended (Oct 2015)
-- FX tables (19-21) only available from Oct 2018 onward
+- Tables 10-12, 16-18 removed when equity/commodity swaps reporting ended (Oct 2015)
+- FX tables (19-21) only available from Oct 2018
+- Each file contains ~8 weeks of overlapping data (deduplication handled by parser)
