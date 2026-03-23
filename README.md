@@ -96,6 +96,26 @@ The current suite emits **18 result rows**: 8 named cross-source tests plus 10 A
 
 Additionally, the advanced analysis found **3 structural breaks** in Form PF GAV/NAV (2017Q3, 2020Q2, 2023Q1) and **2 cointegrating relationships** between Form PF GAV and IR/Credit swap notional — the derivatives market and fund leverage are locked in long-run equilibrium. Full test results are saved to `outputs/reports/cross_source_tests.csv`.
 
+<details>
+<summary><strong>Statistical methods used and why</strong></summary>
+
+<br>
+
+| Method | Where Used | What It Tests | Why This Test |
+|--------|-----------|---------------|---------------|
+| **Augmented Dickey-Fuller (ADF)** | Z.1 leverage ratio, Form PF GAV, GAV/NAV, VIX, COT net positioning | Tests whether a time series has a unit root (non-stationary). Null hypothesis: the series is non-stationary. | Determines whether metrics like leverage mean-revert to a long-run average or trend indefinitely. A stationary leverage ratio implies self-correcting behavior; a non-stationary one implies structural drift. |
+| **Mann-Kendall trend test** | Same series as ADF | Non-parametric test for monotonic trend. Does not assume normality. | Complements ADF — a series can be stationary (ADF) but still have a significant trend (Mann-Kendall). Used because financial time series often violate normality assumptions. |
+| **Granger causality** | All pairwise combinations of VIX, Z.1 leverage, GAV/NAV, COT positioning, swap notional, FCM excess capital | Tests whether past values of series X improve predictions of series Y beyond Y's own history. | Establishes directional causation between data sources — e.g., does a VIX spike *cause* subsequent deleveraging, or do they just co-move? Identifying causal chains is critical for understanding systemic transmission. |
+| **Engle-Granger cointegration** | Z.1 total assets vs Form PF GAV; Form PF GAV vs swap notional | Tests whether two non-stationary series share a long-run equilibrium — they can diverge short-term but are bound together over time. | If the Fed and SEC measures of industry size are cointegrated, they're measuring the same thing with different lags. If not, they're capturing fundamentally different phenomena. |
+| **Two-sample t-test (Welch's)** | Liquidity gap in high-VIX vs low-VIX quarters | Tests whether the mean of a metric differs between two groups. Welch's variant does not assume equal variance. | Determines whether the liquidity mismatch (investor-redeemable minus portfolio-liquid) is significantly worse during stress periods. A significant result means liquidity risk is procyclical. |
+| **TOST equivalence test** | CFTC swap clearing % vs DTCC clearing % | Tests whether two measures are equivalent within a specified margin (10 percentage points). | Standard hypothesis tests can only reject equality — they can't confirm it. TOST flips this: it tests whether two data sources agree closely enough to be interchangeable. |
+| **Spearman rank correlation** | FCM customer segregation vs COT net positioning | Non-parametric correlation that measures monotonic (not just linear) relationships. | Used for cross-source validation where the relationship may be non-linear — e.g., does broker capital move in the same direction as futures positioning? |
+| **Bai-Perron structural break detection** | Form PF GAV/NAV ratio | Identifies dates where the statistical properties of a time series change abruptly. | Locates regime shifts — points where the leverage relationship fundamentally changed (e.g., post-COVID, post-rate-hikes). These are not gradual trends but discrete structural changes. |
+| **Monte Carlo simulation** | Z.1 total assets, liabilities, net assets | Generates 10,000 forward paths using historical return distributions to estimate Value-at-Risk and probability of drawdown. | Provides probabilistic risk estimates rather than point forecasts. VaR 95% tells you the worst-case quarterly loss you'd expect 19 out of 20 times. |
+| **Vector Autoregression (VAR)** | Cross-source aligned quarterly data | Models multiple time series simultaneously, capturing how each variable responds to shocks in the others. | Enables impulse response analysis — if VIX spikes by 1 standard deviation, how do leverage, capital, and positioning respond over the next 8 quarters? |
+
+</details>
+
 ## Visualizations
 
 20+ publication-quality charts generated to `outputs/figures/`:
