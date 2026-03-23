@@ -79,6 +79,9 @@ def _save(fig, save_path):
 
 # Tick formatters
 fmt_billions = FuncFormatter(lambda x, _: f"${x:,.0f}B")
+fmt_trillions = FuncFormatter(
+    lambda x, _: (f"${x / 1000:,.0f}T" if x % 1000 == 0 else f"${x / 1000:,.1f}T") if x >= 1000 else f"${x:,.0f}B"
+)
 fmt_pct = FuncFormatter(lambda x, _: f"{x:.0f}%")
 fmt_ratio = FuncFormatter(lambda x, _: f"{x:.2f}x")
 
@@ -262,10 +265,10 @@ def plot_balance_sheet_overview(df, save_path=None):
     ax.fill_between(df.index, 0, df["Total net assets"], alpha=0.05, color=COLORS["green"])
 
     ax.set_title("Balance Sheet Overview — Assets vs Liabilities vs Net Assets")
-    ax.set_ylabel("Value ($B)")
+    ax.set_ylabel("Value ($T)")
     ax.legend(framealpha=0.9, edgecolor="gray", fontsize=10)
     add_event_annotations(ax)
-    _polish(ax, ylabel_fmt=fmt_billions)
+    _polish(ax, ylabel_fmt=fmt_trillions)
     plt.tight_layout()
     _save(fig, save_path)
     plt.show()
@@ -374,8 +377,26 @@ def _parse_quarter(series):
     return pd.PeriodIndex(series, freq="Q").to_timestamp("Q")
 
 
+def _add_event_spans(axes, label_ax=None):
+    """Add shaded event spans to one or more axes, with labels on label_ax only."""
+    bbox = dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="none", alpha=0.7)
+    # Stagger y-positions to avoid label overlap on closely spaced events
+    stagger = [0.92, 0.92, 0.78, 0.92]
+    for i, (date_str, label) in enumerate(MARKET_EVENTS.items()):
+        date = pd.Timestamp(date_str)
+        for ax in axes:
+            ax.axvspan(date - pd.Timedelta(days=30), date + pd.Timedelta(days=30), alpha=0.06, color="gray")
+        if label_ax is not None:
+            ylim = label_ax.get_ylim()
+            frac = stagger[i] if i < len(stagger) else 0.92
+            ypos = ylim[0] + (ylim[1] - ylim[0]) * frac
+            label_ax.text(
+                date, ypos, label.replace("\n", " "), ha="center", va="top", fontsize=9, color="#555555", bbox=bbox
+            )
+
+
 def plot_form_pf_leverage(df, z1_df=None, save_path=None):
-    """Form PF hedge fund leverage — GAV, NAV, and GAV/NAV ratio.
+    """Form PF hedge fund leverage — two-panel: assets (top) and leverage ratios (bottom).
 
     Parameters
     ----------
@@ -397,18 +418,23 @@ def plot_form_pf_leverage(df, z1_df=None, save_path=None):
     data = data.sort_values("date")
     data["gav_nav_ratio"] = data["gav"] / data["nav"].replace(0, np.nan)
 
-    fig, ax1 = plt.subplots(figsize=(14, 6))
+    fig, (ax_top, ax_bot) = plt.subplots(
+        2, 1, sharex=True, figsize=(14, 8), gridspec_kw={"height_ratios": [1.2, 1]}
+    )
 
-    ax1.plot(data["date"], data["gav"], linewidth=2.5, color=COLORS["blue"], label="GAV")
-    ax1.plot(data["date"], data["nav"], linewidth=2.5, color=COLORS["green"], label="NAV")
-    ax1.set_ylabel("Value ($B)")
+    # --- Top panel: GAV and NAV ---
+    ax_top.plot(data["date"], data["gav"], linewidth=2.5, color=COLORS["blue"], label="GAV")
+    ax_top.plot(data["date"], data["nav"], linewidth=2.5, color=COLORS["green"], label="NAV")
+    ax_top.set_ylabel("Gross / Net Asset Value ($T)")
+    ax_top.legend(loc="upper left", framealpha=0.9, edgecolor="gray", fontsize=10)
+    _polish(ax_top, ylabel_fmt=fmt_trillions, date_axis=False)
+    ax_top.grid(axis="y", alpha=0.3, linestyle="--")
+    ax_top.grid(axis="x", visible=False)
 
-    ax2 = ax1.twinx()
-    ax2.plot(data["date"], data["gav_nav_ratio"], linewidth=2, color=COLORS["red"], label="GAV / NAV")
-    ax2.set_ylabel("GAV / NAV Ratio")
-
+    # --- Bottom panel: leverage ratios ---
+    ax_bot.plot(data["date"], data["gav_nav_ratio"], linewidth=2, color=COLORS["red"], label="GAV / NAV")
     if z1_df is not None and "leverage_ratio" in z1_df.columns:
-        ax2.plot(
+        ax_bot.plot(
             z1_df.index,
             z1_df["leverage_ratio"],
             linewidth=1.5,
@@ -416,15 +442,28 @@ def plot_form_pf_leverage(df, z1_df=None, save_path=None):
             linestyle="--",
             label="Z.1 Leverage Ratio",
         )
+    ax_bot.set_ylabel("Leverage Ratio")
+    ax_bot.legend(loc="upper left", framealpha=0.9, edgecolor="gray", fontsize=10)
+    _polish(ax_bot, ylabel_fmt=fmt_ratio)
+    ax_bot.grid(axis="y", alpha=0.3, linestyle="--")
+    ax_bot.grid(axis="x", visible=False)
 
-    add_event_annotations(ax1)
-    ax1.set_title("Form PF — Hedge Fund Leverage (GAV/NAV)")
-    _polish(ax1, ylabel_fmt=fmt_billions)
-    ax2.spines[["top"]].set_visible(False)
-    ax2.yaxis.set_major_formatter(fmt_ratio)
-    _merge_legends(ax1, ax2)
-    plt.tight_layout()
-    _save(fig, save_path)
+    # --- Title and footer ---
+    fig.suptitle(
+        "U.S. Hedge Fund Industry — Assets & Leverage (2013–2026)", fontsize=14, fontweight="bold", y=0.97
+    )
+
+    footer = (
+        "GAV (Gross Asset Value): Total assets including leveraged positions  •  "
+        "NAV (Net Asset Value): Assets minus liabilities — what investors actually own\n"
+        "GAV / NAV: Leverage proxy — how many dollars of exposure per dollar of equity  •  "
+        "Z.1 Leverage Ratio: Fed balance-sheet leverage (liabilities / net assets)"
+    )
+    fig.text(0.5, 0.01, footer, ha="center", fontsize=8.5, color="#555555", style="italic")
+
+    fig.align_ylabels()
+    plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+    fig.savefig(save_path, bbox_inches="tight", dpi=200) if save_path else None
     plt.show()
 
 

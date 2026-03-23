@@ -7,3 +7,5 @@ __pycache__/
 outputs/
 data/raw/
 data/processed/
+repo-check-before-distribution.md
+form-pf-redesign.md

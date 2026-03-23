@@ -53,7 +53,7 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/christopherortiz/hedge-fund-autopsy"
+Repository = "https://github.com/Promeos/hedge-fund-autopsy"
 
 [build-system]
 requires = ["setuptools>=68.0"]
@@ -65,7 +65,7 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501"]
+ignore = ["E501", "E402"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]

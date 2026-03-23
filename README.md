@@ -6,7 +6,7 @@ Reconstructing the U.S. hedge fund industry from 9 public regulatory data source
 
 An open-source intelligence project dissecting the financial anatomy of U.S. hedge funds — balance sheets, derivatives, borrowing, positioning, and fund-level holdings — stitched together from sources no one combines.
 
-![Balance Sheet Overview](docs/hero_balance_sheet_overview.png)
+![Form PF — Hedge Fund Leverage](docs/hero_form_pf_leverage.png)
 
 ## The Thesis
 
