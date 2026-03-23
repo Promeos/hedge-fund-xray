@@ -1,15 +1,15 @@
 cff-version: 1.2.0
-title: "Hedge Fund X-Ray: Reconstructing the U.S. Hedge Fund Industry from Public Regulatory Data"
+title: "Hedge Fund Autopsy: Reconstructing the U.S. Hedge Fund Industry from Public Regulatory Data"
 message: "If you use this dataset or software, please cite it as below."
 type: dataset
 authors:
   - given-names: Christopher
     family-names: Ortiz
 license: CC-BY-SA-4.0
-repository-code: "https://github.com/christopherortiz/hedge-fund-xray"
-url: "https://github.com/christopherortiz/hedge-fund-xray"
+repository-code: "https://github.com/Promeos/hedge-fund-xray"
+url: "https://github.com/Promeos/hedge-fund-xray"
 version: "1.0.0"
-date-released: "2026-03-22"
+date-released: "2026-03-23"
 abstract: >-
   Unified quarterly dataset and analysis toolkit reconstructing U.S. hedge fund
   industry balance sheets, leverage, derivatives exposure, fund-level equity

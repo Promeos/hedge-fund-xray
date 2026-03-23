@@ -1,4 +1,4 @@
-# Hedge Fund X-Ray
+# Hedge Fund Autopsy
 
 Open-source intelligence project reconstructing the U.S. hedge fund industry from 9 public regulatory data sources — balance sheets, derivatives, borrowing, positioning, fund-level holdings, trade-level swap data, and broker financials.
 

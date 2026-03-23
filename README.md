@@ -1,6 +1,8 @@
-# Hedge Fund X-Ray
+# Hedge Fund Autopsy
 
-An open-source intelligence project reconstructing the U.S. hedge fund industry's financial anatomy from public regulatory data — balance sheets, derivatives, borrowing, positioning, and fund-level holdings — stitched together from sources no one combines.
+Reconstructing the U.S. hedge fund industry from 9 public regulatory data sources.
+
+An open-source intelligence project dissecting the financial anatomy of U.S. hedge funds — balance sheets, derivatives, borrowing, positioning, and fund-level holdings — stitched together from sources no one combines.
 
 ![Balance Sheet Overview](docs/hero_balance_sheet_overview.png)
 
@@ -208,16 +210,16 @@ This project is licensed under [CC BY-SA 4.0](https://creativecommons.org/licens
 This project includes a [`CITATION.cff`](CITATION.cff) file for automated citation. You can also cite manually:
 
 ```
-Ortiz, C. (2026). Hedge Fund X-Ray: Reconstructing the U.S. hedge fund industry
-from public regulatory data. https://github.com/Promeos/hedge-fund-xray
+Ortiz, C. (2026). Hedge Fund Autopsy: Reconstructing the U.S. hedge fund industry
+from public regulatory data. https://github.com/Promeos/hedge-fund-autopsy
 ```
 
 ```bibtex
-@misc{ortiz2026hedgefundxray,
+@misc{ortiz2026hedgefundautopsy,
   author = {Ortiz, Christopher},
-  title = {Hedge Fund X-Ray: Reconstructing the U.S. Hedge Fund Industry from Public Regulatory Data},
+  title = {Hedge Fund Autopsy: Reconstructing the U.S. Hedge Fund Industry from Public Regulatory Data},
   year = {2026},
   publisher = {GitHub},
-  url = {https://github.com/Promeos/hedge-fund-xray}
+  url = {https://github.com/Promeos/hedge-fund-autopsy}
 }
 ```

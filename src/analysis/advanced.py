@@ -1,4 +1,4 @@
-"""Advanced statistical analysis for Hedge Fund X-Ray.
+"""Advanced statistical analysis for Hedge Fund Autopsy.
 
 Granger causality matrix, Johansen cointegration, VAR impulse response,
 structural break detection, Monte Carlo stress testing, and deep-dive

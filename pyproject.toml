@@ -1,5 +1,5 @@
 [project]
-name = "hedge-fund-xray"
+name = "hedge-fund-autopsy"
 version = "1.0.0"
 description = "Open-source intelligence reconstructing the U.S. hedge fund industry from 9 public regulatory data sources"
 readme = "README.md"
@@ -53,7 +53,7 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/christopherortiz/hedge-fund-xray"
+Repository = "https://github.com/christopherortiz/hedge-fund-autopsy"
 
 [build-system]
 requires = ["setuptools>=68.0"]

@@ -1,4 +1,4 @@
-"""Cross-source reconciliation, alignment, and hypothesis testing for Hedge Fund X-Ray."""
+"""Cross-source reconciliation, alignment, and hypothesis testing for Hedge Fund Autopsy."""
 
 import os
 import warnings

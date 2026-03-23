@@ -128,7 +128,7 @@ def step_analyze():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Hedge Fund X-Ray pipeline")
+    parser = argparse.ArgumentParser(description="Hedge Fund Autopsy pipeline")
     parser.add_argument("--fetch", action="store_true", help="Fetch raw data only")
     parser.add_argument("--parse", action="store_true", help="Parse raw data only")
     parser.add_argument("--analyze", action="store_true", help="Run analysis only")
@@ -138,7 +138,7 @@ def main():
     run_all = not (args.fetch or args.parse or args.analyze)
 
     print("=" * 60)
-    print("HEDGE FUND X-RAY PIPELINE")
+    print("HEDGE FUND AUTOPSY PIPELINE")
     print("=" * 60)
 
     if run_all or args.fetch:
